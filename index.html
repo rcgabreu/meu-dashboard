@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha agenda</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+    <div class="bg-blobs" aria-hidden="true"></div>
+
+    <section id="welcome" aria-label="Tela de boas-vindas">
+        <div class="welcome-box" role="main">
+            <span class="welcome-icon" aria-hidden="true">📖</span>
+        <h1>Olá!<br>O que vamos organizar hoje?</h1>
+            <p>Seu cantinho digital de produtividade.</p>
+
+            <div class="theme-picker" role="group" aria-label="Escolha a paleta de cores">
+                <p class="theme-label">🎨 Escolha sua paleta:</p>
+                <div class="theme-swatches">
+                    <button class="theme-swatch active" data-theme="purple" aria-label="Tema roxo (padrão)" aria-pressed="true" title="Roxo">
+                        <span style="background:#6a4c93"></span><span style="background:#c8b6ff"></span>
+                    </button>
+                    <button class="theme-swatch" data-theme="ocean" aria-label="Tema oceano" aria-pressed="false" title="Oceano">
+                        <span style="background:#1a6b8a"></span><span style="background:#a8d8ea"></span>
+                    </button>
+                    <button class="theme-swatch" data-theme="forest" aria-label="Tema floresta" aria-pressed="false" title="Floresta">
+                        <span style="background:#2d6a4f"></span><span style="background:#b7e4c7"></span>
+                    </button>
+                    <button class="theme-swatch" data-theme="rose" aria-label="Tema rosa" aria-pressed="false" title="Rosa">
+                        <span style="background:#c9184a"></span><span style="background:#ffb3c6"></span>
+                    </button>
+                    <button class="theme-swatch" data-theme="sunset" aria-label="Tema pôr do sol" aria-pressed="false" title="Pôr do Sol">
+                        <span style="background:#d4550a"></span><span style="background:#ffd6a5"></span>
+                    </button>
+                    <button class="theme-swatch" data-theme="mono" aria-label="Tema monocromático" aria-pressed="false" title="Mono">
+                        <span style="background:#333"></span><span style="background:#ccc"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <button class="btn-enter" id="btn-google-login" aria-label="Entrar com conta Google">
+                    🔑 ENTRAR COM GOOGLE
+                </button>
+                <button class="btn-enter" id="btn-mock-login"
+                    style="margin-top: 8px; background: var(--pink-dark); font-size: 0.7rem;"
+                    aria-label="Entrar no modo de demonstração sem Google">
+                    🕹️ MODO DEMO (sem Google)
+                </button>
+            </div>
+            <!-- Botão visível apenas se houver sessão demo salva (JS controla display) -->
+            <button id="btn-clear-demo"
+                style="display:none; margin-top:6px; width:100%; background:none; border:2px dashed var(--text-soft); color:var(--text-soft); font-family:'Press Start 2P',monospace; font-size:0.55rem; padding:6px; cursor:pointer;"
+                aria-label="Limpar dados da sessão demo">
+            </button>
+            <p id="auth-status" style="margin-top: 10px; font-size: 0.65rem; color: var(--text-soft);"
+               aria-live="polite" role="status"></p>
+        </div>
+    </section>
+
+    <!-- DASHBOARD PRINCIPAL -->
+    <main id="dashboard" style="display: none;" aria-label="Dashboard principal">
+        <div id="main-content"></div>
+
+        <header class="dash-header" role="banner">
+            <div class="dash-header-left">
+                <h1>Bom dia, <span id="username-display">Dev</span>!</h1>
+                <div class="date" id="today-date" aria-label="Data de hoje"></div>
+                <div class="global-clock-container"
+                    style="margin-top: 8px; display: flex; align-items: center; gap: 8px; font-size: 11px;">
+                    <span>🕒 <span id="global-time" aria-live="off" aria-label="Horário atual">00:00:00</span></span>
+                    <label for="timezone-selector" class="visually-hidden">Selecionar fuso horário</label>
+                    <select id="timezone-selector"
+                        aria-label="Selecionar fuso horário"
+                        style="font-family: 'Press Start 2P', monospace; font-size: 9px; padding: 2px; background: var(--white); border: 2px solid var(--text);">
+                        <option value="local">Horário Local</option>
+                        <option value="America/Sao_Paulo">São Paulo (GMT-3)</option>
+                        <option value="America/New_York">New York (GMT-5)</option>
+                        <option value="Europe/London">London (GMT+1)</option>
+                        <option value="Europe/Paris">Paris (GMT+2)</option>
+                        <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <div class="avatar-pill" role="group" aria-label="Perfil do usuário">
+                    <label class="avatar-circle avatar-upload">
+    <img id="avatar-preview" src="" alt="Foto do usuário" style="display: none;">
+    <span id="avatar-initials">--</span>
+
+    <input type="file" id="avatar-input" accept="image/*" hidden>
+</label>
+                    <div class="avatar-info">
+                        <div style="display: flex; align-items: center; gap: 4px;">
+                            <div class="name" id="avatar-name">Dev</div>
+                            <button id="btn-edit-name"
+                                aria-label="Editar nome"
+                                style="background: none; border: none; cursor: pointer; font-size: 9px; padding: 0;">✏️</button>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                            <span class="role" id="avatar-role">Software Engineer</span>
+                            <button id="btn-edit-role"
+                                aria-label="Editar cargo ou profissão"
+                                style="background: none; border: none; cursor: pointer; font-size: 9px; padding: 0;">✏️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTÃO SAIR -->
+                <button class="btn-enter btn-small btn-logout" id="btn-logout"
+                    aria-label="Sair e voltar para a tela inicial">
+                    🚪 SAIR
+                </button>
+            </div>
+        </header>
+
+        <div class="layout-container">
+
+            <!-- COLUNA ESQUERDA -->
+            <div>
+                <!-- MÉTRICAS -->
+                <div class="grid-metrics" role="region" aria-label="Métricas do dia">
+                    <div class="card-metric emails" role="group" aria-label="E-mails não lidos">
+                        <div class="card-title">E-mails Não Lidos</div>
+                        <div class="card-value" id="metric-emails" aria-live="polite">--</div>
+                    </div>
+                    <div class="card-metric studies" role="group" aria-label="Horas de estudo">
+                        <div class="card-title">Horas de Estudo</div>
+                        <div class="card-value" id="metric-study" aria-live="polite">0h</div>
+                    </div>
+                    <div class="card-metric tasks" role="group" aria-label="Tarefas concluídas">
+                        <div class="card-title">Tarefas Feitas</div>
+                        <div class="card-value" id="metric-tasks" aria-live="polite">0/0</div>
+                    </div>
+                </div>
+
+                <!-- GRÁFICO DE EMAILS -->
+                <div class="pixel-box chart-box" role="region" aria-label="Gráfico de fluxo de e-mails">
+                    <div class="card-stripe-pixel" style="background: var(--green-dark);" aria-hidden="true"></div>
+                    <h3>// Fluxo de Emails Recorrentes</h3>
+                    <div class="chart-container">
+                        <canvas id="emailChart" role="img" aria-label="Gráfico de barras mostrando volume de e-mails nos últimos 7 dias"></canvas>
+                    </div>
+                    <div class="chart-insight" aria-live="polite">
+                        <span class="insight-badge" id="insight-badge">--</span>
+                        <p class="insight-text" id="chart-footer">Carregando dados...</p>
+                    </div>
+                </div>
+
+                <!-- WIDGETS -->
+                <div class="custom-widgets-grid">
+
+                    <!-- POMODORO -->
+                    <div class="pixel-box" role="region" aria-label="Timer Pomodoro">
+                        <div class="card-stripe-pixel" style="background: var(--pink-dark);" aria-hidden="true"></div>
+                        <h3>// Pomodoro Timer</h3>
+                        <div class="pomodoro-container">
+                            <div class="pomodoro-time" id="pomo-display" role="timer" aria-live="off" aria-label="Tempo restante no pomodoro">25:00</div>
+                            <div class="pomodoro-controls">
+                                <button class="btn-enter btn-small" id="pomo-start" aria-label="Iniciar ou pausar o timer pomodoro">START</button>
+                                <button class="btn-enter btn-small" id="pomo-reset" aria-label="Reiniciar o timer pomodoro">RESET</button>
+                                <button id="pomo-zero-day" class="btn-enter btn-small">🗑️ ZERAR DIA</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KANBAN / MEU PROJETO TECH -->
+                    <div class="pixel-box" role="region" aria-label="Lista de tarefas do projeto">
+                        <div class="card-stripe-pixel" style="background: var(--orange-dark);" aria-hidden="true"></div>
+                        <h3>// Meu Projeto Tech</h3>
+                        <div class="kanban-list" id="kanban-task-list" role="list" aria-label="Tarefas do projeto"></div>
+                        <div style="margin-top: 12px; display: flex; gap: 4px;">
+                            <label for="kanban-input" class="visually-hidden">Nova tarefa</label>
+                            <input type="text" id="kanban-input" placeholder="Nova tarefa..."
+                                aria-label="Digite o nome da nova tarefa"
+                                style="flex: 1; font-family: 'Press Start 2P', monospace; font-size: 11px; padding: 4px; border: 2px solid var(--text);">
+                            <button class="btn-enter btn-small" id="kanban-add-btn"
+                                aria-label="Adicionar nova tarefa"
+                                style="width: auto; padding: 4px 8px;">+</button>
+                        </div>
+                    </div>
+
+                    <!-- ASSUNTOS DA SEMANA -->
+                    <div class="pixel-box" role="region" aria-label="Assuntos da semana em tecnologia">
+                        <div class="card-stripe-pixel" style="background: var(--green-dark);"></div>
+                        <h3>// Assuntos da Semana</h3>
+                        <div class="news-ticker-wrapper" aria-live="polite">
+                            <div id="news-container">
+                                <div class="brag-entry" style="text-align:center; padding: 8px 0;">
+                                    <span class="brag-date" style="font-size:9px;">⏳ Carregando...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MULHERES NA TECH + ÍCONES TECH -->
+                    <div class="pixel-box">
+                        <div class="card-stripe-pixel" style="background: var(--pink-mid);"></div>
+                        <h3>// Tech Inspirations</h3>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div class="inspiration-card">
+                                <div class="inspiration-name" id="inspiration-name">Ada Lovelace</div>
+                                <div class="inspiration-role" id="inspiration-role" style="font-size:7px; color:var(--text-soft); margin-bottom:4px; font-family:'Press Start 2P',monospace;">Primeira programadora</div>
+                                <div class="inspiration-quote" id="inspiration-quote">"A imaginação é a faculdade da descoberta."</div>
+                            </div>
+                            <div class="inspiration-card">
+                                <div class="inspiration-name" id="inspiration-name2">Grace Hopper</div>
+                                <div class="inspiration-role" id="inspiration-role2" style="font-size:7px; color:var(--text-soft); margin-bottom:4px; font-family:'Press Start 2P',monospace;">Inventora do compilador</div>
+                                <div class="inspiration-quote" id="inspiration-quote2">"A frase mais perigosa: sempre fizemos assim."</div>
+                            </div>
+                        </div>
+                        <button id="inspiration-next-btn" class="btn-enter btn-small" style="width:100%; margin-top:10px; font-size:8px;" aria-label="Próxima inspiração">✨ PRÓXIMA</button>
+                    </div>
+
+                    <!-- DEV TIP DO DIA -->
+                    <div class="pixel-box" role="region" aria-label="Dica técnica do dia">
+                        <div class="card-stripe-pixel" style="background: var(--orange-dark);"></div>
+                        <h3>// Dev Tip do Dia</h3>
+                        <div id="devtip-container">
+                            <div class="brag-entry" style="text-align:center; padding:8px 0;">
+                                <span class="brag-date" style="font-size:9px;">⏳ Carregando...</span>
+                            </div>
+                        </div>
+                        <button id="devtip-next-btn" class="btn-enter btn-small" style="width:100%; margin-top:10px; font-size:8px;" aria-label="Próxima dica">💡 PRÓXIMA DICA</button>
+                    </div>
+
+                    <!-- FAVORITOS -->
+                    <div class="pixel-box">
+                        <div class="card-stripe-pixel" style="background: var(--text-soft);"></div>
+                        <h3>// Roadmaps Dev</h3>
+                        <div class="links-grid">
+                            <a href="https://roadmap.sh/frontend" target="_blank" class="pixel-link">🎨 Front-end</a>
+                            <a href="https://roadmap.sh/backend" target="_blank" class="pixel-link">⚙️ Back-end</a>
+                            <a href="https://roadmap.sh/qa" target="_blank" class="pixel-link">🧪 QA</a>
+                            <a href="https://roadmap.sh/cyber-security" target="_blank" class="pixel-link">🔐 Cyber</a>
+                        </div>
+                        <a href="https://roadmap.sh" target="_blank" style="display:block; margin-top:10px; font-size:8px; text-align:center; color:var(--text-soft); text-decoration:underline; font-family:'Press Start 2P',monospace;">🗺️ roadmap.sh — todos os roadmaps</a>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <!-- COLUNA DIREITA: AGENDA -->
+            <div class="agenda-col-wrapper">
+                <div class="pixel-box agenda-box" role="region" aria-label="Agenda do dia">
+                <div class="card-stripe-pixel" style="background: var(--text);" aria-hidden="true"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 4px dashed var(--text); padding-bottom: 0.5rem; margin-bottom: 1.2rem;">
+                    <h2 style="border: none; margin: 0; padding: 0;">// Agenda</h2>
+                    <button class="btn-enter btn-small" id="agenda-add-trigger"
+                        aria-label="Adicionar novo item à agenda"
+                        style="width: auto; padding: 4px 8px;">+ NOVO</button>
+                </div>
+                <div class="agenda-list" id="agenda-container" aria-live="polite" aria-label="Itens da agenda"></div>
+            </div>
+            </div><!-- /agenda-col-wrapper -->
+
+        </div><!-- /layout-container -->
+    </main>
+
+    <!-- ============================================================
+         MODAL: AGENDA (CRIAR / EDITAR)
+         ============================================================ -->
+    <div id="edit-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; padding: 1rem;"
+         role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="pixel-box modal-inner" style="max-width: 380px; width: 100%; margin-bottom: 0; max-height: 90vh; overflow-y: auto;">
+            <div class="card-stripe-pixel" style="background: var(--orange-dark);" aria-hidden="true"></div>
+            <h3 id="modal-title">// Novo Item</h3>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 11px;">
+                <label>📝 Nome da Atividade:</label>
+                <input type="text" id="edit-title" placeholder="Ex: Estudo AWS Practitioner"
+                    style="font-family: 'Press Start 2P', monospace; font-size: 11px; padding: 6px; border: 2px solid var(--text); width: 100%;">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label>📅 Data:</label>
+                        <input type="date" id="edit-date"
+                            style="font-family: 'Press Start 2P', monospace; font-size: 10px; padding: 6px; border: 2px solid var(--text); width: 100%;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label>🕒 Horário:</label>
+                        <input type="time" id="edit-time"
+                            style="font-family: 'Press Start 2P', monospace; font-size: 10px; padding: 6px; border: 2px solid var(--text); width: 100%;">
+                    </div>
+                </div>
+
+                <label>⏱ Duração:</label>
+                <input type="text" id="edit-duration" placeholder="Ex: 1h 30min"
+                    style="font-family: 'Press Start 2P', monospace; font-size: 11px; padding: 6px; border: 2px solid var(--text); width: 100%;">
+
+                <label>🏷️ Categoria:</label>
+                <select id="edit-type"
+                    style="font-family: 'Press Start 2P', monospace; font-size: 11px; padding: 6px; border: 2px solid var(--text); width: 100%;">
+                    <option value="type-foco">🟢 Foco</option>
+                    <option value="type-estudo">🟣 Estudo</option>
+                    <option value="type-reuniao">🩷 Reunião</option>
+                </select>
+
+                <label>💬 Observação:</label>
+                <textarea id="edit-obs" placeholder="Anotações, links, lembretes..."
+                    rows="3"
+                    style="font-family: 'Press Start 2P', monospace; font-size: 11px; padding: 6px; border: 2px solid var(--text); width: 100%; resize: vertical; line-height: 1.6;"></textarea>
+
+                <!-- Sincronizar com Google Calendar -->
+                <div style="display: flex; align-items: center; gap: 6px; background: var(--green); border: 2px solid var(--green-dark); padding: 6px;">
+                    <input type="checkbox" id="sync-gcal" style="width: 12px; height: 12px;">
+                    <label for="sync-gcal" style="cursor: pointer;">📆 Sincronizar com Google Calendar</label>
+                </div>
+
+                <div style="display: flex; gap: 6px; margin-top: 4px;">
+                    <button class="btn-enter btn-small" id="edit-save-btn" style="flex: 1;">💾 SALVAR</button>
+                    <button class="btn-enter btn-small" id="edit-cancel-btn" style="flex: 1; background: var(--green-mid); color: var(--text);">✖ SAIR</button>
+                </div>
+                <p id="modal-sync-status" style="font-size: 0.65rem; color: var(--text-soft); text-align: center;"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+        MODAL: EDITAR TAREFA KANBAN
+        ============================================================ -->
+    <div id="kanban-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; padding: 1rem;"
+        role="dialog" aria-modal="true" aria-label="Editar tarefa">
+        <div class="pixel-box" style="max-width: 320px; width: 100%; margin-bottom: 0;">
+            <div class="card-stripe-pixel" style="background: var(--orange-dark);" aria-hidden="true"></div>
+            <h3>// Editar Tarefa</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 11px;">
+                <label>📝 Nome da Tarefa:</label>
+                <input type="text" id="kanban-edit-input"
+                    style="font-family: 'Press Start 2P', monospace; font-size: 11px; padding: 6px; border: 2px solid var(--text); width: 100%;">
+                <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <button class="btn-enter btn-small" id="kanban-save-btn" style="flex: 1;">💾 SALVAR</button>
+                    <button class="btn-enter btn-small" id="kanban-cancel-btn" style="flex: 1; background: var(--green-mid); color: var(--text);">✖ SAIR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Define um objeto global vazio para evitar erros caso o config.js falte
+        window.CONFIG = {
+            GOOGLE_CLIENT_ID: "",
+            GOOGLE_API_KEY: ""
+        };
+    </script>
+    
+    <script src="config.js" onerror="console.log('Modo de produção: usando chaves vazias.');"></script>
+    <script src="script.js"></script>
+    
+    <!-- Libs do Google DEPOIS do script.js: onGapiLoad e onGisLoad já existem quando são chamadas -->
+    <script src="https://apis.google.com/js/api.js" onload="onGapiLoad()"></script>
+    <script src="https://accounts.google.com/gsi/client" onload="onGisLoad()"></script>
+</body>
+
+</html>
