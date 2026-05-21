@@ -345,29 +345,17 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Define um objeto global vazio para evitar erros caso o config.js falte
-        window.CONFIG = {
-            GOOGLE_CLIENT_ID: "",
-            GOOGLE_API_KEY: ""
-        };
-    </script>
     
-    <script>
-        window.CONFIG = {
-            GOOGLE_CLIENT_ID: "",
-            GOOGLE_API_KEY: ""
-        };
-    </script>
     <script>
         window.CONFIG = { GOOGLE_CLIENT_ID: "", GOOGLE_API_KEY: "" };
     </script>
-    
-    <script src="config.js" onerror="console.log('Modo produção.');"></script>
+
+    <script src="config.js" onerror="console.log('config.js não encontrado.');"></script>
     <script src="script.js"></script>
 
-<script async defer src="https://apis.google.com/js/api.js" onload="onGapiLoad()"></script>
-<script async defer src="https://accounts.google.com/gsi/client" onload="onGisLoad()"></script>
+    <script async defer src="https://apis.google.com/js/api.js"
+        onload="onGapiLoad()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client"
+        onload="onGisLoad()"></script>
 </body>
 </html>

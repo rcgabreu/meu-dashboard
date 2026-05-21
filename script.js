@@ -140,27 +140,22 @@ function carregarDados(nomeAutenticado = null) {
 }
 
 async function onGapiLoad() {
-  // Acessa as chaves de forma segura via window.CONFIG
   const apiKey = window.CONFIG ? window.CONFIG.GOOGLE_API_KEY : "";
-
-  if (!apiKey) {
-    console.warn("API Key não configurada. Integração com Google desativada.");
-    return; // Interrompe a execução se não houver chave
-  }
 
   gapi.load("client", async () => {
     try {
-      await gapi.client.init({
-        apiKey: apiKey, // Usa a variável que recuperamos com segurança
+      const initConfig = {
         discoveryDocs: [
           "https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest",
           "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
         ],
-      });
+      };
+
+      if (apiKey) initConfig.apiKey = apiKey;
+
+      await gapi.client.init(initConfig);
       gapiInited = true;
-      if (typeof verificarPronto === 'function') {
-        verificarPronto();
-      }
+      verificarPronto();
     } catch (e) {
       console.warn("Erro ao inicializar gapi.client:", e);
     }
