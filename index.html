@@ -354,8 +354,19 @@
         };
     </script>
     
-    <script src="config.js" onerror="console.log('Modo de produção: usando chaves vazias.');"></script>
+    <script>
+        window.CONFIG = {
+            GOOGLE_CLIENT_ID: "",
+            GOOGLE_API_KEY: ""
+        };
+    </script>
+    <script src="config.js" onerror="console.log('Modo de produção: chaves não encontradas.');"></script>
     <script src="script.js"></script>
+
+    <script src="https://apis.google.com/js/api.js" onload="onGapiLoad()"></script>
+    <script src="https://accounts.google.com/gsi/client" onload="onGisLoad()"></script>
+</body>
+</html>
     
     <!-- Libs do Google DEPOIS do script.js: onGapiLoad e onGisLoad já existem quando são chamadas -->
     <script src="https://apis.google.com/js/api.js" onload="onGapiLoad()"></script>
