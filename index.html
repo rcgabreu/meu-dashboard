@@ -367,7 +367,7 @@
     <script src="config.js" onerror="console.log('Modo produção.');"></script>
     <script src="script.js"></script>
 
-    <script async defer src="https://apis.google.com/js/api.js" onload="console.log('GAPI carregou')"></script>
-    <script async defer src="https://accounts.google.com/gsi/client" onload="console.log('GIS carregou')"></script>
+<script async defer src="https://apis.google.com/js/api.js" onload="onGapiLoad()"></script>
+<script async defer src="https://accounts.google.com/gsi/client" onload="onGisLoad()"></script>
 </body>
 </html>
